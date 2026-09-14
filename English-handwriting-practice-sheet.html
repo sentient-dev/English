@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Multilingual Handwriting Practice Sheet</title>
+
+<!-- ============================================================
+     WEB FONTS (graceful fallback to system fonts when offline)
+     Latin  : Playwrite (US / FR / IN), Dancing Script, Caveat,
+              Edu NSW ACT Foundation, Patrick Hand, Shadows Into Light
+     Telugu : Mandali, Ramabhadra, Gurajada, Suranna, Timmana,
+              Noto Sans Telugu
+     ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playwrite+US+Trad:wght@100..400&family=Playwrite+FR+Moderne:wght@100..400&family=Playwrite+IN:wght@100..400&family=Dancing+Script:wght@400;600&family=Caveat:wght@400;600&family=Edu+NSW+ACT+Foundation:wght@400;600&family=Patrick+Hand&family=Shadows+Into+Light&family=Mandali&family=Ramabhadra&family=Gurajada&family=Suranna&family=Timmana&family=Noto+Sans+Telugu:wght@400;600&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   1. DESIGN TOKENS + BASE LAYOUT (screen only)
+   ============================================================ */
+:root{
+  --bg:#eef3fb; --panel:#ffffff; --ink:#22314f; --muted:#6b7a99;
+  --brand:#3f6fe0; --accent:#ff8a5b; --ok:#1e9e6a; --border:#dbe3f1;
+  --radius:14px; --shadow:0 10px 30px rgba(31,52,97,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:linear-gradient(180deg,#eef3fb 0%,#f7f9ff 100%);
+  color:var(--ink);
+  font-family:"Nunito","Segoe UI",Roboto,system-ui,-apple-system,Arial,sans-serif;
+  font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+
+.app-header{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:linear-gradient(135deg,#3f6fe0,#6f4fe0);color:#fff;
+  border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow);
+}
+.app-header h1{font-size:1.35rem;margin:0;font-weight:800;letter-spacing:.2px}
+.app-header p{margin:2px 0 0;font-size:.9rem;opacity:.92}
+.logo{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);
+  display:grid;place-items:center;font-size:1.5rem;flex:none}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:18px;margin-top:18px}
+fieldset{border:0;margin:0;padding:0}
+legend{padding:0;font-size:1rem;margin:0 0 12px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);font-weight:700}
+.panel h2{font-size:1rem;margin:0 0 12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+label{font-weight:700;font-size:.86rem;color:var(--ink)}
+.hint{font-weight:400;font-size:.78rem;color:var(--muted)}
+select,input[type="number"],textarea,input[type="color"]{
+  font-family:inherit;font-size:1rem;color:var(--ink);background:#fff;
+  border:1.5px solid var(--border);border-radius:10px;padding:9px 10px;width:100%}
+input[type="color"]{padding:3px;height:42px;cursor:pointer}
+input[type="range"]{width:100%;accent-color:var(--brand)}
+select:focus-visible,textarea:focus-visible,input:focus-visible,button:focus-visible{
+  outline:3px solid #ffbf47;outline-offset:2px}
+textarea{min-height:170px;resize:vertical;line-height:1.6;
+  font-family:"Nunito","Noto Sans Telugu","Nirmala UI","Segoe UI",system-ui,sans-serif}
+.row-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.top-grid{display:grid;gap:16px;grid-template-columns:260px 1fr;align-items:start}
+@media (max-width:760px){ .top-grid{grid-template-columns:1fr} }
+
+/* live font preview chip next to the font picker */
+.font-preview{
+  border:1.5px dashed var(--border);border-radius:10px;padding:8px 10px;
+  font-size:1.35rem;line-height:1.35;color:#334;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+.check{display:flex;align-items:center;gap:9px;font-weight:700;font-size:.9rem;
+  cursor:pointer;border:1.5px solid var(--border);border-radius:10px;padding:10px}
+.check input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer}
+
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+button{font-family:inherit;font-size:.95rem;font-weight:800;cursor:pointer;border:none;
+  border-radius:11px;padding:12px 18px;transition:transform .06s ease,filter .15s ease}
+button:active{transform:translateY(1px)}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-accent{background:var(--accent);color:#3a1d0d}
+.btn-accent:hover{filter:brightness(1.05)}
+.btn-ghost{background:#eef2fb;color:var(--ink);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:#e3e9f7}
+
+.status{margin-top:14px;min-height:24px;font-weight:700;font-size:.9rem;color:var(--ok);
+  display:flex;align-items:center;gap:8px}
+.status.warn{color:#b5651d}
+
+/* ============================================================
+   2. A4 PREVIEW AREA (page box sized in mm from JS)
+   ============================================================ */
+.preview-area{margin-top:22px}
+.preview-head{display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.preview-head h2{margin:0;font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.sheets{display:flex;flex-direction:column;align-items:center;gap:26px}
+
+.page{background:#fff;box-shadow:0 12px 34px rgba(31,52,97,.22);border-radius:2px;
+  position:relative;overflow:hidden}
+.page-inner{position:relative;width:100%;height:100%;overflow:hidden}
+.page-badge{position:absolute;right:6mm;bottom:4mm;font-size:9px;color:#9aa8c2;
+  font-family:"Nunito",sans-serif;letter-spacing:.06em}
+
+.hw-row{position:relative;width:100%;break-inside:avoid;page-break-inside:avoid}
+.guide{position:absolute;left:0;right:0;height:0;border-top-width:1px;border-top-style:solid}
+.guide.dashed{border-top-style:dashed}
+.guide.baseline{border-top-width:1.6px}
+.hw-text{position:absolute;left:0;right:0;white-space:pre;overflow:visible;word-break:normal}
+.empty-note{color:var(--muted);text-align:center;padding:28px 10px;font-weight:700}
+.scaler{transform-origin:top center}
+
+/* ============================================================
+   3. PRINT — only the A4 sheets are sent to the printer
+   ============================================================ */
+@media print{
+  @page{ size:A4 portrait; margin:13mm; }
+  html,body{background:#fff !important;margin:0 !important;padding:0 !important}
+  body *{visibility:hidden !important}
+  .sheets, .sheets *{visibility:visible !important}
+  .wrap{max-width:none;padding:0;margin:0}
+  .app-header,.panel,.preview-head,.status,.btns,.no-print{display:none !important}
+  .preview-area{margin:0 !important}
+  .sheets{display:block !important;gap:0 !important;margin:0 !important;padding:0 !important}
+  .scaler{transform:none !important;height:auto !important}
+  .page{box-shadow:none !important;border-radius:0 !important;
+    width:100% !important;height:auto !important;padding:0 !important;margin:0 !important;
+    overflow:visible !important;break-after:page;page-break-after:always}
+  .page:last-child{break-after:auto;page-break-after:auto}
+  .page-inner{height:auto !important;overflow:visible !important}
+  .page-badge{display:none !important}
+  *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header class="app-header">
+    <div class="logo" aria-hidden="true">✍️</div>
+    <div>
+      <h1>Multilingual Handwriting Practice Sheet</h1>
+      <p>Type your text in English, తెలుగు or Français — then print a ruled A4 practice sheet.</p>
+    </div>
+  </header>
+
+  <main>
+  <!-- ================= INPUT ================= -->
+  <section class="panel" aria-labelledby="inputHead">
+    <h2 id="inputHead">1 &middot; Your text</h2>
+
+    <div class="top-grid">
+      <div class="field">
+        <label for="language">Language</label>
+        <select id="language">
+          <option value="en" selected>English</option>
+          <option value="te">Telugu (తెలుగు)</option>
+          <option value="fr">French (Français)</option>
+        </select>
+        <span class="hint" id="langHint"></span>
+
+        <div class="btns" style="margin-top:12px">
+          <button type="button" class="btn-ghost" id="btnSample">Insert sample text</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="userText">Text to practise <span class="hint">(paragraph breaks are kept)</span></label>
+        <textarea id="userText" spellcheck="false" lang="en"
+          placeholder="Type or paste your English text here…"></textarea>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button type="button" class="btn-primary" id="btnGenerate">Generate Practice Sheet</button>
+      <button type="button" class="btn-accent"  id="btnPrint">Print A4 Sheet</button>
+      <button type="button" class="btn-ghost"   id="btnClear">Clear</button>
+    </div>
+
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- ================= FORMATTING ================= -->
+  <section class="panel" aria-labelledby="fmtHead">
+    <fieldset>
+      <legend id="fmtHead">2 &middot; Formatting</legend>
+
+      <!-- Font picker: options change with the selected language -->
+      <div class="row-grid">
+        <div class="field">
+          <label for="fontFamily">Handwriting font</label>
+          <select id="fontFamily"></select>
+          <span class="hint" id="fontHint"></span>
+        </div>
+        <div class="field">
+          <label id="previewLbl">Font preview</label>
+          <div class="font-preview" id="fontPreview" aria-labelledby="previewLbl">Abc</div>
+        </div>
+      </div>
+
+      <div class="row-grid" style="margin-top:14px">
+        <div class="field">
+          <label for="fontSize">Font size <span class="hint" id="fontSizeOut">32 px</span></label>
+          <input type="range" id="fontSize" min="16" max="72" step="1" value="32" />
+        </div>
+        <div class="field">
+          <label for="lineSpacing">Line spacing <span class="hint" id="lineSpacingOut">1.6×</span></label>
+          <input type="range" id="lineSpacing" min="1" max="3" step="0.1" value="1.6" />
+        </div>
+        <div class="field">
+          <label for="textColor">Text colour</label>
+          <input type="color" id="textColor" value="#1d4ed8" />
+        </div>
+        <div class="field">
+          <label for="ruleColor">Rule-line colour</label>
+          <input type="color" id="ruleColor" value="#9ca8bd" />
+        </div>
+        <div class="field">
+          <label for="orientation">Page orientation</label>
+          <select id="orientation">
+            <option value="portrait" selected>Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="alignment">Text alignment</label>
+          <select id="alignment">
+            <option value="left" selected>Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-grid" style="margin-top:14px">
+        <label class="check" for="showGuides">
+          <input type="checkbox" id="showGuides" checked /><span>Show guide lines</span>
+        </label>
+        <label class="check" for="traceMode">
+          <input type="checkbox" id="traceMode" /><span>Tracing mode (light grey text)</span>
+        </label>
+        <label class="check" for="repeatMode">
+          <input type="checkbox" id="repeatMode" /><span>Repeat mode (blank row after each line)</span>
+        </label>
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- ================= PREVIEW ================= -->
+  <section class="preview-area" aria-labelledby="prevHead">
+    <div class="preview-head no-print">
+      <h2 id="prevHead">3 &middot; A4 preview</h2>
+      <span class="hint" id="pageCount"></span>
+    </div>
+    <div class="scaler" id="scaler">
+      <div class="sheets" id="sheets" aria-label="Generated handwriting practice sheets">
+        <p class="empty-note no-print">Your practice sheet will appear here.</p>
+      </div>
+    </div>
+  </section>
+  </main>
+</div>
+
+<!-- dynamic @page rule (portrait / landscape) -->
+<style id="pageRule">@page{ size:A4 portrait; margin:13mm; }</style>
+
+<script>
+"use strict";
+/* ============================================================================
+   MULTILINGUAL HANDWRITING PRACTICE SHEET  ·  single file, no backend
+   - Canvas font metrics drive baseline placement (text sits ON the rule).
+   - ALL languages use the same FOUR-LINE ruling; only the metrics differ
+     (Latin uses x-height for the midline, Telugu uses the base-letter height).
+   ========================================================================== */
+
+var MM = 96 / 25.4;              // 1 mm in CSS px
+var PAGE_MARGIN_MM = 13;         // 12–15 mm print margin
+var A4 = { w: 210, h: 297 };     // mm
+
+/* ---------------------------------------------------------------------------
+   FONT CATALOGUE  (web font first, then system fallbacks)
+   Grouped by script so the picker only offers sensible choices.
+   ------------------------------------------------------------------------ */
+var LATIN_FONTS = [
+  { id:"playwrite-us", label:"Playwrite US Trad (school cursive)",
+    stack:'"Playwrite US Trad","Segoe Script","Bradley Hand",cursive', note:"Modern school cursive — the classic Playwrite look." },
+  { id:"playwrite-fr", label:"Playwrite FR Moderne (French school)",
+    stack:'"Playwrite FR Moderne","Playwrite US Trad","Segoe Script",cursive', note:"French cursive model taught in écoles." },
+  { id:"playwrite-in", label:"Playwrite IN (Indian school)",
+    stack:'"Playwrite IN","Playwrite US Trad","Segoe Script",cursive', note:"Cursive model used in Indian schools." },
+  { id:"dancing",  label:"Dancing Script (elegant cursive)",
+    stack:'"Dancing Script","Segoe Script","Apple Chancery",cursive', note:"Flowing, decorative cursive." },
+  { id:"caveat",   label:"Caveat (casual handwriting)",
+    stack:'"Caveat","Bradley Hand","Segoe Script",cursive', note:"Relaxed everyday handwriting." },
+  { id:"edu",      label:"Edu NSW ACT Foundation (beginner)",
+    stack:'"Edu NSW ACT Foundation","Playwrite US Trad","Comic Sans MS",cursive', note:"Foundation style for early learners." },
+  { id:"patrick",  label:"Patrick Hand (print handwriting)",
+    stack:'"Patrick Hand","Comic Sans MS","Segoe Print",cursive', note:"Neat printed letters, not joined." },
+  { id:"shadows",  label:"Shadows Into Light (light script)",
+    stack:'"Shadows Into Light","Segoe Script",cursive', note:"Thin, airy script — good for tracing." }
+];
+var TELUGU_FONTS = [
+  { id:"mandali",  label:"Mandali (clear & rounded)",
+    stack:'"Mandali","Noto Sans Telugu","Gautami","Nirmala UI",sans-serif', note:"Clean textbook-style Telugu." },
+  { id:"ramabhadra", label:"Ramabhadra (bold, chalk-like)",
+    stack:'"Ramabhadra","Mandali","Noto Sans Telugu","Nirmala UI",sans-serif', note:"Heavier strokes, good for tracing." },
+  { id:"gurajada", label:"Gurajada (handwritten feel)",
+    stack:'"Gurajada","Mandali","Noto Sans Telugu","Nirmala UI",sans-serif', note:"Softer, hand-drawn character shapes." },
+  { id:"suranna",  label:"Suranna (traditional serif)",
+    stack:'"Suranna","Mandali","Noto Sans Telugu","Nirmala UI",serif', note:"Classical Telugu letterforms." },
+  { id:"timmana",  label:"Timmana (calligraphic)",
+    stack:'"Timmana","Mandali","Noto Sans Telugu","Nirmala UI",serif', note:"Pen-like contrast in the strokes." },
+  { id:"noto",     label:"Noto Sans Telugu (universal)",
+    stack:'"Noto Sans Telugu","Gautami","Nirmala UI","Pothana2000",sans-serif', note:"Widest glyph coverage — safest fallback." }
+];
+/* Default font per language */
+var DEFAULT_FONT = { en:"playwrite-us", fr:"playwrite-fr", te:"mandali" };
+/* Remember the user's choice separately for each language */
+var chosenFont = { en:"playwrite-us", fr:"playwrite-fr", te:"mandali" };
+
+var SAMPLES = {
+  en: "The quick brown fox jumps over the lazy dog.\n" +
+      "Practice makes progress, so write a little every day.\n\n" +
+      "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm\n" +
+      "Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz",
+  te: "తెలుగు భాష మధురమైనది, తీయనైనది.\n" +
+      "అమ్మ ఒడి మొదటి బడి; ప్రతిరోజూ కొంచెం రాయండి.\n\n" +
+      "ఖా ఘా చా ఛా జా ఝా బా భా టా మా యా లా\n" +
+      "అ ఆ ఇ ఈ ఉ ఊ ఋ ఎ ఏ ఐ ఒ ఓ ఔ అం అః",
+  fr: "Le vif renard brun saute par-dessus le chien paresseux.\n" +
+      "Élève appliqué, écris chaque jour avec soin et plaisir.\n\n" +
+      "à â æ ç é è ê ë î ï ô œ ù û ü ÿ\n" +
+      "L'hôtel où le cœur naïf rêve à Noël."
+};
+var PLACEHOLDERS = {
+  en:"Type or paste your English text here…",
+  te:"మీ తెలుగు వాక్యాలను ఇక్కడ టైప్ చేయండి…",
+  fr:"Saisissez ou collez votre texte français ici…"
+};
+var HINTS = {
+  en:"Four-line cursive format (ascender, midline, baseline, descender).",
+  te:"Four-line format with extra room for matras above and below.",
+  fr:"Four-line cursive format with full accent support."
+};
+var PREVIEW_TEXT = { en:"Handwriting abcdefg", fr:"Élève naïf — œuvre çà", te:"తెలుగు రాత ఖా ఘా" };
+
+/* ---------- Element refs ---------- */
+var $ = function (id) { return document.getElementById(id); };
+var elLang=$("language"), elText=$("userText"), elStatus=$("status"),
+    elSheets=$("sheets"), elScaler=$("scaler"), elPageCount=$("pageCount"),
+    elFontFamily=$("fontFamily"), elFontPreview=$("fontPreview"), elFontHint=$("fontHint"),
+    elFontSize=$("fontSize"), elLineSpacing=$("lineSpacing"),
+    elTextColor=$("textColor"), elRuleColor=$("ruleColor"),
+    elOrientation=$("orientation"), elAlign=$("alignment"),
+    elGuides=$("showGuides"), elTrace=$("traceMode"), elRepeat=$("repeatMode"),
+    elPageRule=$("pageRule");
+
+var measureCtx = document.createElement("canvas").getContext("2d");
+
+/* ---------- Font helpers ---------- */
+function fontListFor(lang){ return lang === "te" ? TELUGU_FONTS : LATIN_FONTS; }
+function fontById(lang, id){
+  var list = fontListFor(lang);
+  for (var i=0;i<list.length;i++){ if(list[i].id===id) return list[i]; }
+  return list[0];
+}
+/* Rebuild the font <select> for the active language */
+function populateFontPicker(){
+  var lang = elLang.value, list = fontListFor(lang);
+  elFontFamily.textContent = "";
+  for (var i=0;i<list.length;i++){
+    var o = document.createElement("option");
+    o.value = list[i].id;
+    o.textContent = list[i].label;
+    elFontFamily.appendChild(o);
+  }
+  elFontFamily.value = chosenFont[lang] || DEFAULT_FONT[lang];
+  updateFontPreview();
+}
+function updateFontPreview(){
+  var lang = elLang.value, f = fontById(lang, elFontFamily.value);
+  elFontPreview.style.fontFamily = f.stack;
+  elFontPreview.lang = lang;
+  elFontPreview.textContent = PREVIEW_TEXT[lang];
+  elFontHint.textContent = f.note;
+}
+
+/* ============================================================================
+   FONT METRICS
+   asc / desc  : full ascent & descent (used to place the baseline)
+   xh          : x-height  → Latin upper-middle line
+   body        : Telugu base-letter height → top line of the double rule
+   ========================================================================== */
+function getMetrics(fontStack, sizePx, lang){
+  measureCtx.font = sizePx + "px " + fontStack;
+  var asc, desc, xh, body;
+  try{
+    var mUp   = measureCtx.measureText(lang==="te" ? "కైతీఖ్రౌ" : "Hbdfhklt");
+    var mDown = measureCtx.measureText(lang==="te" ? "ృుూ" : "gjpqy");
+    asc  = mUp.fontBoundingBoxAscent;
+    desc = mUp.fontBoundingBoxDescent;
+    if(!isFinite(asc)||asc<=0)  asc  = mUp.actualBoundingBoxAscent;
+    if(!isFinite(desc)||desc<=0) desc = mDown.actualBoundingBoxDescent;
+    xh   = measureCtx.measureText(lang==="te" ? "అ" : "x").actualBoundingBoxAscent;
+    body = measureCtx.measureText("క").actualBoundingBoxAscent;   // Telugu only
+  }catch(e){ /* fall through to ratio defaults */ }
+
+  if(!isFinite(asc)  || asc<=0)  asc  = sizePx*0.90;
+  if(!isFinite(desc) || desc<=0) desc = sizePx*0.35;
+  if(!isFinite(xh)   || xh<=0)   xh   = sizePx*0.48;
+  if(!isFinite(body) || body<=0) body = sizePx*0.52;
+
+  if(lang==="te"){
+    // generous head/foot room so matras and conjuncts are never clipped
+    asc  = Math.max(asc,  sizePx*1.05);
+    desc = Math.max(desc, sizePx*0.55);
+    body = Math.min(Math.max(body, sizePx*0.40), asc*0.70);
+  }else{
+    asc  = Math.max(asc,  sizePx*0.80);
+    desc = Math.max(desc, sizePx*0.28);
+    xh   = Math.min(Math.max(xh, sizePx*0.30), asc*0.75);
+  }
+  return { asc:asc, desc:desc, xh:xh, body:body };
+}
+
+/* ============================================================================
+   WORD WRAPPING — whitespace aware, with character breaking for long words
+   ========================================================================== */
+function measureWidth(s){ return measureCtx.measureText(s).width; }
+
+function wrapParagraph(paragraph, maxWidth){
+  if(paragraph.trim()==="") return [""];
+  var tokens = paragraph.split(/(\s+)/), lines = [], current = "";
+  for(var i=0;i<tokens.length;i++){
+    var tok = tokens[i];
+    if(tok==="") continue;
+    if(/^\s+$/.test(tok)){
+      if(current==="") continue;
+      if(measureWidth(current+tok)<=maxWidth) current += tok;
+      else { lines.push(current.replace(/\s+$/,"")); current=""; }
+      continue;
+    }
+    if(measureWidth(current+tok)<=maxWidth){ current += tok; continue; }
+    if(current!==""){ lines.push(current.replace(/\s+$/,"")); current=""; }
+    if(measureWidth(tok)<=maxWidth){ current = tok; continue; }
+    var chunk="", chars = Array.from(tok);
+    for(var c=0;c<chars.length;c++){
+      if(chunk!=="" && measureWidth(chunk+chars[c])>maxWidth){ lines.push(chunk); chunk=""; }
+      chunk += chars[c];
+    }
+    current = chunk;
+  }
+  if(current!=="") lines.push(current.replace(/\s+$/,""));
+  return lines.length ? lines : [""];
+}
+
+/* ============================================================================
+   ROW BUILDER
+   Geometry measured from the top of the row (text top = 0):
+
+   Latin "four"      Telugu "double"            Telugu "single"
+   ─ ascender  (0)   · matra head-room (0)      · top guide (dashed)
+   ┄ midline         ─ body top    (solid)      ─ baseline (solid)
+   ─ baseline        ─ baseline    (solid)
+   ┄ descender       (room below for ు ూ ృ)
+   ========================================================================== */
+function buildRow(text, cfg){
+  var row = document.createElement("div");
+  row.className = "hw-row";
+  row.style.height = cfg.rowHeight + "px";
+
+  if(cfg.showGuides){
+    var mk = function(top, style, extra){
+      var g = document.createElement("div");
+      g.className = "guide" + (style==="dashed" ? " dashed" : "") + (extra ? " "+extra : "");
+      g.style.top = top + "px";
+      g.style.borderTopColor = cfg.ruleColor;
+      row.appendChild(g);
+    };
+    /* One ruling for every language: ascender · midline · baseline · descender */
+    mk(0,         "solid");               // ascender line   (top)
+    mk(cfg.midY,  "dashed");              // upper-middle    (dotted)
+    mk(cfg.baseY, "solid", "baseline");   // baseline        (strongest)
+    mk(cfg.descY, "dashed");              // descender line  (bottom)
+  }
+
+  if(text!==""){
+    var t = document.createElement("div");
+    t.className = "hw-text";
+    t.lang = cfg.langTag;
+    t.style.fontFamily = cfg.fontStack;
+    t.style.fontSize   = cfg.fontSize + "px";
+    t.style.lineHeight = (cfg.m.asc + cfg.m.desc) + "px";
+    t.style.top   = (cfg.baseY - cfg.m.asc) + "px";   // exact baseline alignment
+    t.style.color = cfg.trace ? "#a7a7a7" : cfg.textColor;
+    t.style.textAlign = cfg.align;
+    t.textContent = text;                             // safe — never innerHTML
+    row.appendChild(t);
+  }
+  return row;
+}
+
+/* ============================================================================
+   MAIN GENERATOR
+   ========================================================================== */
+function generate(announce){
+  var lang = elLang.value;
+  var langTag = lang==="te" ? "te" : (lang==="fr" ? "fr" : "en");
+  var font = fontById(lang, elFontFamily.value);
+  var fontStack = font.stack;
+  var fontSize = parseInt(elFontSize.value,10);
+  var spacing = parseFloat(elLineSpacing.value);
+  var landscape = elOrientation.value==="landscape";
+
+  var pageWmm = landscape ? A4.h : A4.w;
+  var pageHmm = landscape ? A4.w : A4.h;
+  var innerWpx = (pageWmm - PAGE_MARGIN_MM*2) * MM;
+  var innerHpx = (pageHmm - PAGE_MARGIN_MM*2) * MM;
+
+  elPageRule.textContent = "@page{ size:A4 " + (landscape?"landscape":"portrait") +
+                           "; margin:" + PAGE_MARGIN_MM + "mm; }";
+
+  var m = getMetrics(fontStack, fontSize, lang);
+  var gap = (spacing-1)*fontSize + 6;
+
+  /* Upper-middle line: x-height for Latin, base-letter height for Telugu,
+     so in both scripts the line marks the top of the ordinary letter body. */
+  var midHeight = (lang === "te") ? m.body : m.xh;
+
+  var cfg = {
+    fontStack:fontStack, fontSize:fontSize, m:m, langTag:langTag,
+    align:elAlign.value, textColor:elTextColor.value, ruleColor:elRuleColor.value,
+    showGuides:elGuides.checked, trace:elTrace.checked,
+    midY: m.asc - midHeight,     // top of the ordinary letter body
+    baseY: m.asc,
+    descY: m.asc + m.desc
+  };
+  cfg.rowHeight = Math.ceil(cfg.descY + gap);
+
+  measureCtx.font = fontSize + "px " + fontStack;
+  var paragraphs = elText.value.replace(/\r\n?/g,"\n").split("\n");
+  var lines = [];
+  for(var p=0;p<paragraphs.length;p++){
+    lines = lines.concat(wrapParagraph(paragraphs[p], innerWpx));
+  }
+  while(lines.length && lines[lines.length-1]==="") lines.pop();
+
+  var rowTexts = [];
+  for(var i=0;i<lines.length;i++){
+    rowTexts.push(lines[i]);
+    if(elRepeat.checked && lines[i]!=="") rowTexts.push("");   // blank practice row
+  }
+  if(!rowTexts.length) rowTexts = [""];
+
+  /* Paginate — a row is never split between two pages */
+  var rowsPerPage = Math.max(1, Math.floor(innerHpx / cfg.rowHeight));
+  var pages = [];
+  for(var r=0;r<rowTexts.length;r+=rowsPerPage) pages.push(rowTexts.slice(r, r+rowsPerPage));
+
+  elSheets.textContent = "";
+  for(var pg=0;pg<pages.length;pg++){
+    var page = document.createElement("section");
+    page.className = "page";
+    page.setAttribute("aria-label","Practice sheet page "+(pg+1));
+    page.style.width = pageWmm+"mm";
+    page.style.height = pageHmm+"mm";
+    page.style.padding = PAGE_MARGIN_MM+"mm";
+
+    var inner = document.createElement("div");
+    inner.className = "page-inner";
+    for(var k=0;k<pages[pg].length;k++) inner.appendChild(buildRow(pages[pg][k], cfg));
+    page.appendChild(inner);
+
+    var badge = document.createElement("div");
+    badge.className = "page-badge no-print";
+    badge.textContent = "A4 "+(landscape?"landscape":"portrait")+" — page "+(pg+1)+" of "+pages.length;
+    page.appendChild(badge);
+
+    elSheets.appendChild(page);
+  }
+
+  fitPreview(pageWmm);
+  elPageCount.textContent = pages.length + (pages.length===1 ? " page" : " pages");
+
+  if(announce!==false){
+    var written = lines.filter(function(l){ return l!==""; }).length;
+    setStatus("✅ Sheet ready — "+written+" line(s), four-line ruling in "+font.label.replace(/\s*\(.*\)$/,"")+
+              ", across "+pages.length+" A4 "+(landscape?"landscape":"portrait")+" page(s).");
+  }
+}
+
+/* Scale the preview down on small screens */
+function fitPreview(pageWmm){
+  var available = elScaler.parentElement.clientWidth;
+  var scale = Math.min(1, available / (pageWmm*MM));
+  elScaler.style.transform = scale<1 ? "scale("+scale+")" : "none";
+  elScaler.style.height = scale<1 ? (elSheets.scrollHeight*scale)+"px" : "auto";
+}
+function setStatus(msg, warn){
+  elStatus.textContent = msg;
+  elStatus.className = "status" + (warn ? " warn" : "");
+}
+
+/* ============================================================================
+   EVENT WIRING
+   ========================================================================== */
+function applyLanguageUI(){
+  var lang = elLang.value;
+  elText.setAttribute("placeholder", PLACEHOLDERS[lang]);
+  elText.lang = lang;
+  $("langHint").textContent = HINTS[lang];
+  populateFontPicker();
+  if(lang==="te" && parseInt(elFontSize.value,10) < 30){ elFontSize.value = 34; syncOutputs(); }
+}
+function syncOutputs(){
+  $("fontSizeOut").textContent = elFontSize.value + " px";
+  $("lineSpacingOut").textContent = parseFloat(elLineSpacing.value).toFixed(1) + "×";
+}
+function hasSheet(){ return !!elSheets.querySelector(".page"); }
+
+$("btnGenerate").addEventListener("click", function(){
+  if(elText.value.trim()===""){
+    setStatus("⚠️ Please type some text first (or insert the sample text).", true);
+    generate(false); return;
+  }
+  generate(true);
+});
+
+$("btnClear").addEventListener("click", function(){
+  elText.value = "";
+  elSheets.textContent = "";
+  var note = document.createElement("p");
+  note.className = "empty-note no-print";
+  note.textContent = "Your practice sheet will appear here.";
+  elSheets.appendChild(note);
+  elPageCount.textContent = "";
+  elScaler.style.transform = "none";
+  elScaler.style.height = "auto";
+  setStatus("Cleared. Ready for new text.");
+  elText.focus();
+});
+
+$("btnSample").addEventListener("click", function(){
+  elText.value = SAMPLES[elLang.value];
+  generate(true);
+});
+
+$("btnPrint").addEventListener("click", function(){
+  if(!hasSheet()) generate(false);
+  elScaler.style.transform = "none";      // never print a scaled page
+  elScaler.style.height = "auto";
+  window.print();
+});
+window.addEventListener("afterprint", function(){
+  fitPreview(elOrientation.value==="landscape" ? A4.h : A4.w);
+});
+
+elLang.addEventListener("change", function(){
+  applyLanguageUI();
+  if(hasSheet()) generate(true);
+});
+
+/* Font picker: remember the choice per language, reload the font, redraw */
+elFontFamily.addEventListener("change", function(){
+  chosenFont[elLang.value] = elFontFamily.value;
+  updateFontPreview();
+  var stack = fontById(elLang.value, elFontFamily.value).stack;
+  if(document.fonts && document.fonts.load){
+    document.fonts.load(parseInt(elFontSize.value,10)+"px "+stack.split(",")[0])
+      .catch(function(){}).then(function(){ if(hasSheet()) generate(true); });
+  }else if(hasSheet()){ generate(true); }
+});
+
+["fontSize","lineSpacing","textColor","ruleColor","orientation","alignment",
+ "showGuides","traceMode","repeatMode"].forEach(function(id){
+  $(id).addEventListener("input", function(){
+    syncOutputs();
+    if(hasSheet()) generate(false);
+  });
+});
+
+window.addEventListener("resize", function(){
+  if(hasSheet()) fitPreview(elOrientation.value==="landscape" ? A4.h : A4.w);
+});
+
+/* ============================================================================
+   BOOT — wait for web fonts so measurement matches what is painted
+   ========================================================================== */
+function boot(){
+  applyLanguageUI();
+  syncOutputs();
+  elText.value = SAMPLES.en;
+  generate(true);
+}
+if(document.fonts && document.fonts.load){
+  Promise.all([
+    document.fonts.load('32px "Playwrite US Trad"'),
+    document.fonts.load('32px "Playwrite FR Moderne"'),
+    document.fonts.load('32px "Mandali"'),
+    document.fonts.load('32px "Noto Sans Telugu"')
+  ]).catch(function(){})
+   .then(function(){ return document.fonts.ready; })
+   .catch(function(){})
+   .then(boot, boot);
+}else{
+  window.addEventListener("load", boot);
+}
+</script>
+</body>
+</html>
